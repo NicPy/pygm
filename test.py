@@ -21,21 +21,26 @@ meteors = pygame.sprite.Group()
 explosions = []
 
 music = pygame.mixer.Sound('assets/music/bg.wav')
-music.play(-1)
+# music.play(-1)
 
 # Game objects
 player = Player(clock, rockets)
 background = Background()
 cloud1 = Cloud('assets/cloud1.png', 2)
 cloud2 = Cloud('assets/cloud2.png', 1.5)
+tank = Tank()
+
+gun = Gun()
 # rocket = Rocket(player.rect.midtop)
 
 
 all_objects.add(background)
-all_objects.add(player)
+# all_objects.add(player)
 all_objects.add(cloud1)
 all_objects.add(cloud2)
-all_objects.add(Meteorit())
+# all_objects.add(Meteorit())
+all_objects.add(tank)
+all_objects.add(gun)
 # all_objects.add(rocket)
 
 
@@ -44,6 +49,9 @@ while True:
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			sys.exit(0)
+		# if event.type == pygame.MOUSEMOTION:
+		# 	mousex, mousey = event.pos
+		# 	moveVector = (mousex, mousey)
 
 	fast_esc = pygame.key.get_pressed()
 	if fast_esc[pygame.K_ESCAPE]:
@@ -51,7 +59,7 @@ while True:
 
 	screen.fill(WHITE)
 
-	Meteorit.process_meteors(clock, meteors)
+	# Meteorit.process_meteors(clock, meteors)
 
 	all_objects.update()
 	rockets.update()

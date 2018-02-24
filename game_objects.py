@@ -57,7 +57,66 @@ class Player(pygame.sprite.Sprite):
 				self.rockets.remove(rocket)
 
 
+class Tank(pygame.sprite.Sprite):
+	speed = 4
 
+	def __init__(self):
+		super(Tank, self).__init__()
+		self.image = pygame.image.load('assets/tank.png')
+		self.rect = self.image.get_rect()
+		self.rect.bottom = HEIGHT - 50
+		self.rect.left = 50 
+
+	def update(self):
+		keys = pygame.key.get_pressed()
+
+		if keys[pygame.K_LEFT]:
+			self.current_speed = -self.speed
+
+		elif keys[pygame.K_RIGHT]:
+			self.current_speed = self.speed 
+		else:
+			self.current_speed = 0
+
+		self.rect.move_ip((self.current_speed, 0))
+
+class Gun(Tank):
+	cooldown = 10
+	current_cooldown = 0
+
+	def __init__(self):
+		super(Gun, self).__init__()
+		self.image = pygame.image.load('assets/gun.png')
+		self.rect = self.image.get_rect()
+		self.rect.bottom = HEIGHT - 75
+		self.rect.left = 110
+		self.angle = 20
+		self.new_img = self.image
+
+	def update(self):
+		ms, my = pygame.mouse.get_pos()
+		# a = HEIGHT - my
+		# c = ()  
+		# self.rect.left = (10)
+		# if ms > 300:
+		# 	self.image = pygame.transform.rotate(self.image, self.angle)
+			# self.rect.move_ip((1, 1))
+
+
+		def rot_center(image, angle):
+			orig_rect = image.get_rect()
+			rot_image = pygame.transform.rotate(image, angle)
+			rot_rect = orig_rect.copy()
+			rot_rect.center = rot_image.get_rect().center
+			# rot_image = rot_image.subsurface(rot_rect).copy()
+			return rot_image
+
+		if self.current_cooldown <= 0:
+			self.image = rot_center(self.image, self.angle)
+			self.current_cooldown = self.cooldown
+		else:
+			self.current_cooldown-= 0.5
+ 
 
 class Background(pygame.sprite.Sprite):
 	def __init__(self):
