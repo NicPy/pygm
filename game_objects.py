@@ -1,5 +1,8 @@
 import pygame
 from settings import *
+from pygame.math import Vector2
+import math
+
 
 class Rocket(pygame.sprite.Sprite):
 	speed = -10
@@ -80,43 +83,102 @@ class Tank(pygame.sprite.Sprite):
 
 		self.rect.move_ip((self.current_speed, 0))
 
+
 class Gun(Tank):
 	cooldown = 10
 	current_cooldown = 0
-
-	def __init__(self):
+	max_speed = 0.1
+	shooting_cooldown = 600
+	
+	def __init__(self, pos, shells):
 		super(Gun, self).__init__()
-		self.image = pygame.image.load('assets/gun.png')
-		self.rect = self.image.get_rect()
-		self.rect.bottom = HEIGHT - 75
-		self.rect.left = 110
-		self.angle = 20
-		self.new_img = self.image
+		self.image = pygame.image.load('assets/gunlong.png')
+		self.orig_image = self.image  # Store a reference to the original.
+		self.rect = self.image.get_rect(center=pos)
+		self.pos = Vector2(pos)
+		self.shells = shells
+		self.current_shooting_cooldown = 0
 
 	def update(self):
-		ms, my = pygame.mouse.get_pos()
-		# a = HEIGHT - my
-		# c = ()  
-		# self.rect.left = (10)
-		# if ms > 300:
-		# 	self.image = pygame.transform.rotate(self.image, self.angle)
-			# self.rect.move_ip((1, 1))
-
-
-		def rot_center(image, angle):
-			orig_rect = image.get_rect()
-			rot_image = pygame.transform.rotate(image, angle)
-			rot_rect = orig_rect.copy()
-			rot_rect.center = rot_image.get_rect().center
-			# rot_image = rot_image.subsurface(rot_rect).copy()
-			return rot_image
-
 		if self.current_cooldown <= 0:
-			self.image = rot_center(self.image, self.angle)
+			self.rotate()
+			self.process_shooting()
 			self.current_cooldown = self.cooldown
 		else:
-			self.current_cooldown-= 0.5
- 
+			self.current_cooldown-= 10
+ 	
+
+	def rotate(self):
+		 # The vector to the target (the mouse position).
+		direction = pygame.mouse.get_pos() - self.pos
+		# .as_polar gives you the polar coordinates of the vector,
+		# i.e. the radius (distance to the target) and the angle.
+		radius, angle = direction.as_polar()
+		# Rotate the image by the negative angle (y-axis in pygame is flipped).
+		self.image = pygame.transform.rotate(self.orig_image, -angle)
+		# Create a new rect with the center of the old rect.
+		self.rect = self.image.get_rect(center=self.rect.center)
+
+
+	def process_shooting(self):
+		keys = pygame.key.get_pressed()
+		if keys[pygame.K_SPACE] and self.current_shooting_cooldown <= 0:
+			# self.rocket_sound.play()
+			# print('yes')
+			self.shells.add(Shell(self.rect.midtop))
+			self.current_shooting_cooldown = self.shooting_cooldown
+
+		else:
+			self.current_shooting_cooldown -= 10
+		for shell in list(self.shells):
+			if shell.rect.bottom < 0:
+				self.shells.remove(shell)
+			
+		# for shell in list(self.shells):
+		# 	if rocket.rect.bottom < 0:
+		# 		self.rockets.remove(rocket)
+			
+
+class Shell(pygame.sprite.Sprite):
+	# speed = -11
+	t = 2
+	v= 12
+	g= 9.81 
+	def __init__(self, position):
+		super(Shell, self).__init__()
+		self.image = pygame.image.load('assets/shell.png')
+		self.rect = self.image.get_rect()
+		self.rect.midbottom = position
+		self.y= position[1]
+		self.x= position[0]
+		self.angle = 45
+
+		self.starting_shell = [self.x, self.y]
+
+	def update(self):
+		# self.x = self.x + self.v*self.t*math.cos(self.angle*(math.pi/180 )) 
+		# self.y = self.y + self.v*self.t*math.sin(self.angle*(math.pi/180 )) -(self.g*self.t**2)/2 	
+		
+		if self.y >= HEIGHT or self.x >= WIDTH:
+			self.rect.center = (self.x, self.y)
+			
+		else:	
+			# self.x += (12 - self.rect.midbottom[0])**2
+			# self.y += int(((self.x - self.rect.midbottom[0])*0.015)**2)
+			self.rect.center = (self.x, self.y)
+		
+		self.x += 1
+		# self.y += int(((self.x - self.starting_shell[0])*0.01)**2)
+		# self.y += int(((self.x)**2 + 4*self.x)*0.00001)
+		# self.x = self.x + self.v*self.t*math.cos(self.angle) 
+		self.y += (self.v*self.t*math.sin(self.angle) -(self.g*self.t**2)/2)*0.001 	
+		print(self.x, self.y)
+
+
+		# self.rect.move_ip(2, 2)
+		# self.rect 
+		# print(self.x, self.y)
+
 
 class Background(pygame.sprite.Sprite):
 	def __init__(self):

@@ -17,10 +17,11 @@ explode_anim = pyganim.PygAnimation([
 all_objects = pygame.sprite.OrderedUpdates()
 rockets = pygame.sprite.Group()
 meteors = pygame.sprite.Group()
+shells = pygame.sprite.Group()
 
 explosions = []
 
-music = pygame.mixer.Sound('assets/music/bg.wav')
+# music = pygame.mixer.Sound('assetss/music/bg.wav')
 # music.play(-1)
 
 # Game objects
@@ -30,7 +31,7 @@ cloud1 = Cloud('assets/cloud1.png', 2)
 cloud2 = Cloud('assets/cloud2.png', 1.5)
 tank = Tank()
 
-gun = Gun()
+gun = Gun((110, HEIGHT-80), shells)
 # rocket = Rocket(player.rect.midtop)
 
 
@@ -64,7 +65,7 @@ while True:
 	all_objects.update()
 	rockets.update()
 	meteors.update()
-
+	shells.update()
 	meteors_and_bomb_collided = pygame.sprite.groupcollide(meteors, rockets, True, True)
 	for collied in meteors_and_bomb_collided:
 		explosion = explode_anim.getCopy()
@@ -79,6 +80,7 @@ while True:
 	all_objects.draw(screen)
 	rockets.draw(screen)
 	meteors.draw(screen)
+	shells.draw(screen)
 
 
 	for explosion, position in explosions.copy():
