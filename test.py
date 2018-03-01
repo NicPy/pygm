@@ -31,17 +31,18 @@ cloud1 = Cloud('assets/cloud1.png', 2)
 cloud2 = Cloud('assets/cloud2.png', 1.5)
 tank = Tank()
 
-gun = Gun((110, HEIGHT-80), shells)
+gun = Gun((137, HEIGHT-80), shells)
 # rocket = Rocket(player.rect.midtop)
 
 
 all_objects.add(background)
-# all_objects.add(player)
 all_objects.add(cloud1)
 all_objects.add(cloud2)
-# all_objects.add(Meteorit())
 all_objects.add(tank)
 all_objects.add(gun)
+
+# all_objects.add(player)
+# all_objects.add(Meteorit())
 # all_objects.add(rocket)
 
 

@@ -85,6 +85,7 @@ class Tank(pygame.sprite.Sprite):
 
 
 class Gun(Tank):
+	speed = 4
 	cooldown = 10
 	current_cooldown = 0
 	max_speed = 0.1
@@ -92,7 +93,7 @@ class Gun(Tank):
 	
 	def __init__(self, pos, shells):
 		super(Gun, self).__init__()
-		self.image = pygame.image.load('assets/gunlong.png')
+		self.image = pygame.image.load('assets/gun.png')
 		self.orig_image = self.image  # Store a reference to the original.
 		self.rect = self.image.get_rect(center=pos)
 		self.pos = Vector2(pos)
@@ -106,6 +107,18 @@ class Gun(Tank):
 			self.current_cooldown = self.cooldown
 		else:
 			self.current_cooldown-= 10
+
+		keys = pygame.key.get_pressed()
+
+		if keys[pygame.K_LEFT]:
+			self.current_speed = -self.speed
+
+		elif keys[pygame.K_RIGHT]:
+			self.current_speed = self.speed 
+		else:
+			self.current_speed = 0
+
+		self.rect.move_ip((self.current_speed, 0))
  	
 
 	def rotate(self):
@@ -117,7 +130,9 @@ class Gun(Tank):
 		# Rotate the image by the negative angle (y-axis in pygame is flipped).
 		self.image = pygame.transform.rotate(self.orig_image, -angle)
 		# Create a new rect with the center of the old rect.
-		self.rect = self.image.get_rect(center=self.rect.center)
+		self.rect = self.image.get_rect(left = self.rect.left, bottom = self.rect.bottom)
+
+		# self.rect = self.image.get_rect(center=(self.rect.center))
 
 
 	def process_shooting(self):
@@ -125,7 +140,7 @@ class Gun(Tank):
 		if keys[pygame.K_SPACE] and self.current_shooting_cooldown <= 0:
 			# self.rocket_sound.play()
 			# print('yes')
-			self.shells.add(Shell(self.rect.midtop))
+			self.shells.add(Shell(self.rect.topright))
 			self.current_shooting_cooldown = self.shooting_cooldown
 
 		else:
@@ -141,38 +156,55 @@ class Gun(Tank):
 
 class Shell(pygame.sprite.Sprite):
 	# speed = -11
-	t = 2
-	v= 12
+	# t = 2
+	v= 11
 	g= 9.81 
 	def __init__(self, position):
 		super(Shell, self).__init__()
 		self.image = pygame.image.load('assets/shell.png')
 		self.rect = self.image.get_rect()
+		self.pos = Vector2(position)
 		self.rect.midbottom = position
 		self.y= position[1]
 		self.x= position[0]
-		self.angle = 45
-
-		self.starting_shell = [self.x, self.y]
+		# self.angle = 85
+		self.t = 0
+		# self.starting_shell = [self.x, self.y]
 
 	def update(self):
-		# self.x = self.x + self.v*self.t*math.cos(self.angle*(math.pi/180 )) 
-		# self.y = self.y + self.v*self.t*math.sin(self.angle*(math.pi/180 )) -(self.g*self.t**2)/2 	
-		
-		if self.y >= HEIGHT or self.x >= WIDTH:
+		direction = pygame.mouse.get_pos() - self.pos
+		# .as_polar gives you the polar coordinates of the vector,
+		# i.e. the radius (distance to the target) and the angle.
+		radius, anglee = direction.as_polar()
+
+		# self.angle = anglee
+		self.angle = 90 + ((math.atan2(self.pos[0]-pygame.mouse.get_pos()[0], self.pos[1]-pygame.mouse.get_pos()[1] ))/2)*100
+
+
+
+		print(self.angle)
+		if self.t <4: 
 			self.rect.center = (self.x, self.y)
+			# self.x = self.x + self.v*self.t*math.cos(self.angle*(math.pi/180 )) 
+			# self.y -= self.v*self.t*math.sin(self.angle*(math.pi/180 )) -(self.g*self.t**2)/2 	
 			
-		else:	
-			# self.x += (12 - self.rect.midbottom[0])**2
-			# self.y += int(((self.x - self.rect.midbottom[0])*0.015)**2)
-			self.rect.center = (self.x, self.y)
+			self.x = self.x + self.v*self.t*math.cos(self.angle*(math.pi/180 )) 
+			self.y -= self.v*self.t*math.sin(self.angle*(math.pi/180 )) -(self.g*self.t**2)/2 	
+			
+			self.t += 0.03
+		# if self.y >= HEIGHT or self.x >= WIDTH:
+			
+		# else:	
+		# 	# self.x += (12 - self.rect.midbottom[0])**2
+		# 	# self.y += int(((self.x - self.rect.midbottom[0])*0.015)**2)
+		# 	self.rect.center = (self.x, self.y)
 		
-		self.x += 1
+		# self.x += 1
 		# self.y += int(((self.x - self.starting_shell[0])*0.01)**2)
 		# self.y += int(((self.x)**2 + 4*self.x)*0.00001)
 		# self.x = self.x + self.v*self.t*math.cos(self.angle) 
-		self.y += (self.v*self.t*math.sin(self.angle) -(self.g*self.t**2)/2)*0.001 	
-		print(self.x, self.y)
+		# self.y += (self.v*self.t*math.sin(self.angle) -(self.g*self.t**2)/2)*0.001 	
+		# print(self.x, self.y)
 
 
 		# self.rect.move_ip(2, 2)
