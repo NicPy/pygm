@@ -4,6 +4,9 @@ from pygame.math import Vector2
 import math
 
 
+def get_angle(pos):
+	return 90 + ((math.atan2(pos[0]-pygame.mouse.get_pos()[0], pos[1]-pygame.mouse.get_pos()[1] ))/2)*100
+
 class Rocket(pygame.sprite.Sprite):
 	speed = -10
 	def __init__(self, position):
@@ -83,15 +86,46 @@ class Tank(pygame.sprite.Sprite):
 
 		self.rect.move_ip((self.current_speed, 0))
 
+class Power_scale(pygame.sprite.Sprite):
+			max_speed = -4
+			MAX_DOWN = 450
+			MAX_UP = 250
+			def __init__(self):
+				super(Power_scale, self).__init__()
+				self.image = pygame.image.load('assets/power.jpg')
+				self.rect = self.image.get_rect()
+				self.rect.midbottom = (30, 450)
+				self.power = 0
+
+
+			def update(self):
+				keys = pygame.key.get_pressed()
+				mkeys = pygame.mouse.get_pressed()
+				print(mkeys)
+
+				if self.rect.bottom > self.MAX_DOWN:
+					self.rect.bottom = (450)
+				elif self.rect.bottom < self.MAX_UP:
+					self.rect.bottom = (250)
+				elif self.rect.bottom <= self.MAX_DOWN and self.rect.bottom >= self.MAX_UP: 
+					if keys[pygame.K_UP]:
+						self.rect.move_ip(0, self.max_speed)
+					elif keys[pygame.K_DOWN]:
+						self.rect.move_ip(0, -self.max_speed)
+				self.power = 20 - (self.rect.bottom-250)/10
+
+				if keys[pygame.K_SPACE] or mkeys == MOUSE_BUTTON_LEFT:
+					self.rect.midbottom = (30, 450)
+			
 
 class Gun(Tank):
 	speed = 4
 	cooldown = 10
 	current_cooldown = 0
 	max_speed = 0.1
-	shooting_cooldown = 600
+	shooting_cooldown = 400
 	
-	def __init__(self, pos, shells):
+	def __init__(self, pos, shells, screen, power):
 		super(Gun, self).__init__()
 		self.image = pygame.image.load('assets/gun.png')
 		self.orig_image = self.image  # Store a reference to the original.
@@ -99,6 +133,8 @@ class Gun(Tank):
 		self.pos = Vector2(pos)
 		self.shells = shells
 		self.current_shooting_cooldown = 0
+		self.screen = screen
+		self.power = power
 
 	def update(self):
 		if self.current_cooldown <= 0:
@@ -118,8 +154,10 @@ class Gun(Tank):
 		else:
 			self.current_speed = 0
 
-		self.rect.move_ip((self.current_speed, 0))
- 	
+		self.rect.move_ip((self.current_speed, 0)) 	
+
+		self.power.power
+		# print(self.power.power)
 
 	def rotate(self):
 		 # The vector to the target (the mouse position).
@@ -137,29 +175,38 @@ class Gun(Tank):
 
 	def process_shooting(self):
 		keys = pygame.key.get_pressed()
-		if keys[pygame.K_SPACE] and self.current_shooting_cooldown <= 0:
+		mkeys = pygame.mouse.get_pressed()
+		
+
+		if keys[pygame.K_SPACE] or mkeys == MOUSE_BUTTON_LEFT:
+			if  self.current_shooting_cooldown <= 0:
 			# self.rocket_sound.play()
 			# print('yes')
-			self.shells.add(Shell(self.rect.topright))
-			self.current_shooting_cooldown = self.shooting_cooldown
+
+				angl = get_angle(self.rect.topright)
+				self.shells.add(Shell(self.rect.topright, angl, self.power.power))
+				self.current_shooting_cooldown = self.shooting_cooldown
+		# elif keys[pygame.K_UP]: 
 
 		else:
-			self.current_shooting_cooldown -= 10
+			self.current_shooting_cooldown -= 20
+
 		for shell in list(self.shells):
-			if shell.rect.bottom < 0:
+
+			if len(self.shells)+1  >= 5:	#max №-1 shells on field
+				print(self.shells)
 				self.shells.remove(shell)
-			
-		# for shell in list(self.shells):
-		# 	if rocket.rect.bottom < 0:
-		# 		self.rockets.remove(rocket)
+
 			
 
+
 class Shell(pygame.sprite.Sprite):
+
 	# speed = -11
 	# t = 2
-	v= 11
+	
 	g= 9.81 
-	def __init__(self, position):
+	def __init__(self, position, angl, power):
 		super(Shell, self).__init__()
 		self.image = pygame.image.load('assets/shell.png')
 		self.rect = self.image.get_rect()
@@ -167,23 +214,28 @@ class Shell(pygame.sprite.Sprite):
 		self.rect.midbottom = position
 		self.y= position[1]
 		self.x= position[0]
-		# self.angle = 85
+		self.angle = angl
 		self.t = 0
+		self.v = power
 		# self.starting_shell = [self.x, self.y]
 
 	def update(self):
-		direction = pygame.mouse.get_pos() - self.pos
+		# direction = pygame.mouse.get_pos() - self.pos
 		# .as_polar gives you the polar coordinates of the vector,
 		# i.e. the radius (distance to the target) and the angle.
-		radius, anglee = direction.as_polar()
+		# radius, anglee = direction.as_polar()
 
 		# self.angle = anglee
-		self.angle = 90 + ((math.atan2(self.pos[0]-pygame.mouse.get_pos()[0], self.pos[1]-pygame.mouse.get_pos()[1] ))/2)*100
 
 
 
-		print(self.angle)
-		if self.t <4: 
+		# print(self.angle)
+		if self.rect.centery >= HEIGHT-50: 
+			self.rect.center= (self.x, self.y)
+		# if self.rect.right >= WIDTH: 
+		# 	self.rect.midbottom = (self.x, self.y-35)
+		
+		else:
 			self.rect.center = (self.x, self.y)
 			# self.x = self.x + self.v*self.t*math.cos(self.angle*(math.pi/180 )) 
 			# self.y -= self.v*self.t*math.sin(self.angle*(math.pi/180 )) -(self.g*self.t**2)/2 	
@@ -191,7 +243,7 @@ class Shell(pygame.sprite.Sprite):
 			self.x = self.x + self.v*self.t*math.cos(self.angle*(math.pi/180 )) 
 			self.y -= self.v*self.t*math.sin(self.angle*(math.pi/180 )) -(self.g*self.t**2)/2 	
 			
-			self.t += 0.03
+			self.t += 0.05 
 		# if self.y >= HEIGHT or self.x >= WIDTH:
 			
 		# else:	
@@ -210,6 +262,9 @@ class Shell(pygame.sprite.Sprite):
 		# self.rect.move_ip(2, 2)
 		# self.rect 
 		# print(self.x, self.y)
+
+	
+
 
 
 class Background(pygame.sprite.Sprite):
@@ -239,6 +294,20 @@ class Cloud(pygame.sprite.Sprite):
 
 		if self.rect.left >= self.rect.width:
 			self.rect.right = 0
+
+class Alien(pygame.sprite.Sprite):
+	"""docstring for Alien"""
+	def __init__(self):
+		super(Alien, self).__init__()
+		self.image = pygame.image.load('assets/alien.png')
+		self.rect = self.image.get_rect()
+		self.rect.center = (WIDTH-110,  HEIGHT -170)
+
+	def update(self):
+		pass
+		
+
+
 class Meteorit(pygame.sprite.Sprite):
 	cooldown = 250
 	current_cooldown = 0
