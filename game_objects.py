@@ -101,21 +101,22 @@ class Power_scale(pygame.sprite.Sprite):
 			def update(self):
 				keys = pygame.key.get_pressed()
 				mkeys = pygame.mouse.get_pressed()
-				print(mkeys)
+				
 
 				if self.rect.bottom > self.MAX_DOWN:
 					self.rect.bottom = (450)
 				elif self.rect.bottom < self.MAX_UP:
 					self.rect.bottom = (250)
 				elif self.rect.bottom <= self.MAX_DOWN and self.rect.bottom >= self.MAX_UP: 
-					if keys[pygame.K_UP]:
+
+					if keys[pygame.K_UP] :
 						self.rect.move_ip(0, self.max_speed)
-					elif keys[pygame.K_DOWN]:
+						
+					# if keys[pygame.K_SPACE] or mkeys == MOUSE_BUTTON_LEFT:
+					# 	self.rect.midbottom = (30, 450)
+					elif keys[pygame.K_DOWN] or pygame.MOUSEBUTTONDOWN == True:
 						self.rect.move_ip(0, -self.max_speed)
 				self.power = 20 - (self.rect.bottom-250)/10
-
-				if keys[pygame.K_SPACE] or mkeys == MOUSE_BUTTON_LEFT:
-					self.rect.midbottom = (30, 450)
 			
 
 class Gun(Tank):
@@ -193,7 +194,7 @@ class Gun(Tank):
 
 		for shell in list(self.shells):
 
-			if len(self.shells)+1  >= 5:	#max №-1 shells on field
+			if len(self.shells)  >= 5:	#max №-1 shells on field
 				print(self.shells)
 				self.shells.remove(shell)
 
@@ -340,6 +341,16 @@ class Meteorit(pygame.sprite.Sprite):
 
 				meteorites.remove(m) 
 
+class Rocket_wall(pygame.sprite.Sprite):
+	def __init__(self):
+		super(Rocket_wall, self).__init__()
+		self.image = pygame.image.load('assets/rocket_wall.png')
+		self.rect = self.image.get_rect()
+		self.rect.midbottom = (WIDTH/2, HEIGHT-90)
+
+	def update(self):
+		pass
+		
 
 
 

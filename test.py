@@ -1,7 +1,7 @@
 import sys, pygame, pyganim
 from game_objects import *
 from settings import *
-
+from menu import *
 
 pygame.init()
 pygame.display.set_caption("Hi, it is me!")
@@ -38,6 +38,7 @@ cloud2 = Cloud('assets/cloud2.png', 1.5)
 tank = Tank()
 alien = Alien()
 power = Power_scale()
+rocket_wall = Rocket_wall()
 
 gun = Gun((137, HEIGHT-80), shells, screen, power)
 # rocket = Rocket(player.rect.midtop)
@@ -50,69 +51,80 @@ all_objects.add(cloud2)
 all_objects.add(tank)
 all_objects.add(gun)
 all_objects.add(alien)
+all_objects.add(rocket_wall)
 
 # all_objects.add(player)
 # all_objects.add(Meteorit())
 # all_objects.add(rocket)
 
-
-
 while True:
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			sys.exit(0)
+
+		if event.type == pygame.MOUSEBUTTONDOWN:
+			if event.button == 4:
+				WHEEL_DOWN = True
+			elif event.button == 5:
+				WHEEL_UP = True
+
+	if intro == True:
+		game_intro(screen)
+		print(intro)
 		# if event.type == pygame.MOUSEMOTION:
 		# 	mousex, mousey = event.pos
 		# 	moveVector = (mousex, mousey)
 
-	fast_esc = pygame.key.get_pressed()
-	if fast_esc[pygame.K_ESCAPE]:
-		sys.exit()
-
-	screen.fill(WHITE)
-	shells_and_alien_collided = pygame.sprite.spritecollide(alien, shells, True)
-
-	#game over
-	if shells_and_alien_collided:
-		all_objects.remove(alien)
-		
-		game_over(0,200)
-		pygame.display.flip()
-		pygame.time.wait(5000)
 	else:
+		fast_esc = pygame.key.get_pressed()
+		if fast_esc[pygame.K_ESCAPE]:
+			sys.exit()
 
-		# Meteorit.process_meteors(clock, meteors)
+		screen.fill(WHITE)
+		shells_and_alien_collided = pygame.sprite.spritecollide(alien, shells, True)
+		sehells_and_rocket_collide = pygame.sprite.spritecollide(rocket_wall, shells, True)
 
-		all_objects.update()
-		rockets.update()
-		meteors.update()
-		shells.update()
-		meteors_and_bomb_collided = pygame.sprite.groupcollide(meteors, rockets, True, True)
+		#game over
+		if shells_and_alien_collided:
+			all_objects.remove(alien)
+			
+			game_over(0,200)
+			pygame.display.flip()
+			pygame.time.wait(5000)
+		else:
+
+			# Meteorit.process_meteors(clock, meteors)
+
+			all_objects.update()
+			# rockets.update()
+			meteors.update()
+			shells.update()
+			meteors_and_bomb_collided = pygame.sprite.groupcollide(meteors, rockets, True, True)
 
 
-		for collied in meteors_and_bomb_collided:
-			explosion = explode_anim.getCopy()
-			explosion.play()
-			explosions.append((explosion, (collied.rect.center)))
+			for collied in meteors_and_bomb_collided:
+				explosion = explode_anim.getCopy()
+				explosion.play()
+				explosions.append((explosion, (collied.rect.center)))
 
-		player_and_metor_collided = pygame.sprite.spritecollide(player, meteors, True)
-
-
-		all_objects.draw(screen)
-		rockets.draw(screen)
-		meteors.draw(screen)
-		shells.draw(screen)
+			player_and_metor_collided = pygame.sprite.spritecollide(player, meteors, True)
 
 
-		for explosion, position in explosions.copy():
-			if explosion.isFinished():
-				# print(explosions)
-				# print('/************************/')
-				# print(explosion)
-				explosions.remove((explosion, position))
-			else:
-				x, y = position
-				explosion.blit(screen, (x-30, y-50))
+			all_objects.draw(screen)
+			# rockets.draw(screen)
+			meteors.draw(screen)
+			shells.draw(screen)
+
+
+			for explosion, position in explosions.copy():
+				if explosion.isFinished():
+					# print(explosions)
+					# print('/************************/')
+					# print(explosion)
+					explosions.remove((explosion, position))
+				else:
+					x, y = position
+					explosion.blit(screen, (x-30, y-50))
 
 		pygame.display.flip()
 		clock.tick(30)
