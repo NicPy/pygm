@@ -1,150 +1,43 @@
-import pygame
-import time
-import random
- 
-pygame.init()
- 
-display_width = 800
-display_height = 600
- 
-black = (0,0,0)
-white = (255,255,255)
-red = (255,0,0)
- 
-block_color = (53,115,255)
- 
-car_width = 73
- 
-gameDisplay = pygame.display.set_mode((display_width,display_height))
-pygame.display.set_caption('A bit Racey')
-clock = pygame.time.Clock()
- 
-carImg = pygame.image.load('assets/alien.png')
- 
- 
-def things_dodged(count):
-    font = pygame.font.SysFont(None, 25)
-    text = font.render("Dodged: "+str(count), True, black)
-    gameDisplay.blit(text,(0,0))
- 
-def things(thingx, thingy, thingw, thingh, color):
-    pygame.draw.rect(gameDisplay, color, [thingx, thingy, thingw, thingh])
- 
-def car(x,y):
-    gameDisplay.blit(carImg,(x,y))
- 
-def text_objects(text, font):
-    textSurface = font.render(text, True, black)
-    return textSurface, textSurface.get_rect()
- 
-def message_display(text):
-    largeText = pygame.font.Font('freesansbold.ttf',115)
-    TextSurf, TextRect = text_objects(text, largeText)
-    TextRect.center = ((display_width/2),(display_height/2))
-    gameDisplay.blit(TextSurf, TextRect)
- 
-    pygame.display.update()
- 
-    time.sleep(2)
- 
-    game_loop()
-    
-    
- 
-def crash():
-    message_display('You Crashed')
+# `pos` is the `x,y` from `event.pos`
+# x, y is the x/y co-ords from the x/y where you render a button
+# x1, y1 is the width/height for the button.
+# This function will return true if the button is clicked on.
 
-def game_intro():
+def button_check(pos, x, y, x1, y1): 
+    return pos[0] >= x and pos[0] < x + x1 and pos[1] >= y and pos[1] < y + y1
 
-    intro = True
+# This function will create a nice button with text in it.
+# `sufrace` is like the default 'DISPLAYSURF', `color` is the color of the box
+# `text_color` is the color of the text in the box
+# `x/y` are the co-ords of the button. `width/height` are the dimensions of button
+# `text` is the text for the label.
 
-    while intro:
-        for event in pygame.event.get():
-            print(event)
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                quit()
-                
-        gameDisplay.fill(white)
-        largeText = pygame.font.Font('freesansbold.ttf',115)
-        TextSurf, TextRect = text_objects("A bit Racey", largeText)
-        TextRect.center = ((display_width/2),(display_height/2))
-        gameDisplay.blit(TextSurf, TextRect)
-        pygame.display.update()
-        clock.tick(15)
-        
-        
-    
-    
+def make_button(surface,color,text_color,x,y,width,height,text):
+    pygame.draw.rect(surface, (0,0,0),(x-1,y-1,width+2,height+2),1) #makes outline around the box
+    pygame.draw.rect(surface, color,(x,y,width,height))#mkes the box
 
-    
-def game_loop():
-    x = (display_width * 0.45)
-    y = (display_height * 0.8)
- 
-    x_change = 0
- 
-    thing_startx = random.randrange(0, display_width)
-    thing_starty = -600
-    thing_speed = 4
-    thing_width = 100
-    thing_height = 100
- 
-    thingCount = 1
- 
-    dodged = 0
- 
-    gameExit = False
- 
-    while not gameExit:
- 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                quit()
- 
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    x_change = -5
-                if event.key == pygame.K_RIGHT:
-                    x_change = 5
- 
-            if event.type == pygame.KEYUP:
-                if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-                    x_change = 0
- 
-        x += x_change
-        gameDisplay.fill(white)
- 
-        things(thing_startx, thing_starty, thing_width, thing_height, block_color)
- 
- 
-        
-        thing_starty += thing_speed
-        car(x,y)
-        things_dodged(dodged)
- 
-        if x > display_width - car_width or x < 0:
-            crash()
- 
-        if thing_starty > display_height:
-            thing_starty = 0 - thing_height
-            thing_startx = random.randrange(0,display_width)
-            dodged += 1
-            thing_speed += 1
-            thing_width += (dodged * 1.2)
- 
-        if y < thing_starty+thing_height:
-            print('y crossover')
- 
-            if x > thing_startx and x < thing_startx + thing_width or x+car_width > thing_startx and x + car_width < thing_startx+thing_width:
-                print('x crossover')
-                crash()
-        
-        pygame.display.update()
-        clock.tick(60)
+    myfont = pygame.font.SysFont('Arial Black', 15) #creates the font, size 15 (you can change this)
+    label = myfont.render(text, 1, text_color) #creates the label
+    surface.blit(label, (x+2, y)) #renders the label
 
-game_intro()
-game_loop()
-pygame.quit()
-quit()
+
+
+#example of use:
+menu_items = ['Play','Load','Volume','High Scores','Exit']
+while True:
+    for i in range(len(menu_items)-1):#goes through each item
+        make_button(DISPLAYSURF,SILVER,BLACK,10,10+(20*i),120,menu_items[i]) #puts the item into the make_button, `+20*i` will make each item 15px down from the last.
+
+    for event in pygame.event.get():
+        if event.type == 5:
+            if event.button == 1:
+                for i in range(len(menu_items)-1):#check every button
+
+                    if button_check(event.pos,10,10+(20*i),120):
+                        if i == 0:
+                            play()
+                        elif i == 1:
+                            load()
+                        elif i == 4:
+                            pygame.quit()
+                            sys.exit()

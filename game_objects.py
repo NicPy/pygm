@@ -298,11 +298,13 @@ class Cloud(pygame.sprite.Sprite):
 
 class Alien(pygame.sprite.Sprite):
 	"""docstring for Alien"""
+
 	def __init__(self):
 		super(Alien, self).__init__()
+		import random
 		self.image = pygame.image.load('assets/alien.png')
 		self.rect = self.image.get_rect()
-		self.rect.center = (WIDTH-110,  HEIGHT -170)
+		self.rect.center = (WIDTH - random.randint(100, 120),  HEIGHT - random.randint(50, 220))
 
 	def update(self):
 		pass
@@ -344,9 +346,9 @@ class Meteorit(pygame.sprite.Sprite):
 class Rocket_wall(pygame.sprite.Sprite):
 	def __init__(self):
 		super(Rocket_wall, self).__init__()
-		self.image = pygame.image.load('assets/rocket_wall.png')
+		self.image = pygame.image.load('assets/rocket_wall2.png')
 		self.rect = self.image.get_rect()
-		self.rect.midbottom = (WIDTH/2, HEIGHT-90)
+		self.rect.midbottom = (WIDTH/2, HEIGHT-70)
 
 	def update(self):
 		pass
