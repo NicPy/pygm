@@ -81,6 +81,7 @@ SCORE = 0
 TIME_COUNTER = 0
 START_TIME  = pygame.time.get_ticks()
 ROCKET_DAMAGE = 5
+HELP = False
 
 #
 # MAIN LOOP  --------------------------------------------------------------------------------------------
@@ -103,7 +104,15 @@ while True:
 			screen.blit(text_objects('YOUR FINAL SCORE: '+ str(SCORE)), (250, 100))
 			with open('SCORE.TXT', 'w') as f:
 				f.write(str(SCORE))
+	elif HELP == True:
 
+		screen.blit(HELP_PAGE, (0, 0))
+		pygame.display.flip()
+		# pygame.time.delay(3000)
+
+		if pressed[pygame.K_ESCAPE]:
+			MENU = True
+			HELP = False
 
 	elif MENU == True:
 		START_TIME  = pygame.time.get_ticks()
@@ -124,14 +133,7 @@ while True:
 		if button_help.mouse_in() == True:
 			pygame.time.wait(100)
 			button_play.rect.move_ip(2, 2)
-			if not pressed[pygame.K_ESCAPE]:
-
-				screen.blit(HELP_PAGE, (0, 0))
-				pygame.display.flip()
-				pygame.time.delay(3000)
-
-				if pressed[pygame.K_ESCAPE]:
-					MENU = True
+			HELP = True
 
 
 		screen.blit(menubg_image, (0, 0))
